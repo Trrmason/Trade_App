@@ -14,5 +14,7 @@ class CoinDataViewSet(viewsets.ModelViewSet):
     filterset_fields = ("pair",)
 
 class ExecutedTradeViewSet(viewsets.ModelViewSet):
-    queryset = ExecutedTrade.objects.all()
+    queryset = ExecutedTrade.objects.all().order_by('-id')
     serializer_class = ExecutedTradeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ("coinData__pair",)

@@ -1,0 +1,46 @@
+body {
+    background-color: white;
+}
+
+.tradeTable {
+    position: absolute;
+    width: 35%;
+    align-self: right;
+    top: 0%;
+    right: 0%;
+}
+
+.chart {
+    position: relative;
+}
+.chartBody {
+    position: relative;
+}
+
+.Footer{
+    position: absolute;
+    bottom: 0%;
+    width: 100%;
+}
+
+.footerText{
+    color: white;
+    size: 1em;
+}
+
+.dropdown{
+    position: absolute;
+    top: .2%;
+    left: 39%;
+}
+.dropdownCustom{
+    background-color: whitesmoke;
+    border-style: None; 
+    color: black;
+}
+
+.dropdownCustom:hover, .dropdownCustom:active{
+    background-color: #ECECEC;
+    color: black;
+    outline: None;
+}

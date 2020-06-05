@@ -1,6 +1,6 @@
 from django.db import models
 import datetime
-
+from pytz import timezone
 
 class CoinPair(models.Model):
     pair = models.CharField(primary_key=True, max_length=50)
@@ -18,8 +18,10 @@ class CoinData(models.Model):
     closeTime = models.IntegerField()
 
     def __str__(self):
+        tz = timezone('EST')
         time = datetime.datetime.fromtimestamp(round(self.closeTime/1000))
-        return '{} --- {}  ---  {}'.format(self.pair,round(self.closePrice,12), time)
+        date = tz.localize(time)
+        return '{} --- {}  ---  {}'.format(self.pair,round(self.closePrice,12), date)
 
     class Meta:
         ordering = ['-closeTime']
@@ -34,8 +36,10 @@ class ExecutedTrade(models.Model):
     decision = models.IntegerField()
     
     def __str__(self):
+        tz = timezone('US/Eastern')
         time = datetime.datetime.fromtimestamp(round(self.coinData.closeTime/1000))
+        date = tz.localize(time)
         return '{} --- {} --- {}  ---  {}'.format('BUY' if int(self.decision) == 1 else "SELL",
                                                   self.coinData.pair,
                                                   round(self.coinData.closePrice,12), 
-                                                  time)
+                                                  date)

@@ -5,6 +5,8 @@ import datetime
 import equations as eq
 import numpy as np
 import pandas as pd
+import schedule
+import time
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
@@ -68,6 +70,15 @@ def prepare_data(data):
     outValues = df.drop(columns=['id','closePrice', 'openTime', 'closeTime', 'lowPrice', 'highPrice', 'openPrice'], axis=1)
     return np.array(outValues.iloc[-3:-1]), valueId
 
+def check_valid_trade(decision, pair):
+    base = "http://127.0.0.1:8000/executed_trade/?coinData__pair={}".format(pair)
+    response = requests.get(base).json()['results']
+    if len(response) > 0:
+        prevDecision = response[0]['decision']
+        if prevDecision == decision:
+            return False
+    return True
+
 def post_trade(decision, valueId):
     base = "http://127.0.0.1:8000/executed_trade/"
     params = {
@@ -78,26 +89,42 @@ def post_trade(decision, valueId):
     print(response.text)
 
 def bundle(pair):
+    print(pair)
     model = joblib.load('./trained_models/{}_model.pkl'.format(pair.lower()))
     data = pull_data(pair)
     values, valueId = prepare_data(data)
     rsiVals = values[:,2]
     tradeDecision = pull_trigger(rsiVals[0], rsiVals[-1])
-    print(rsiVals)
     print(tradeDecision)
     if tradeDecision:
         predVal = np.array([values[-1]])
         prediction = model.predict(predVal)[0]
-        post_trade(prediction, valueId)
+        validCheck = check_valid_trade(prediction, pair)
+        print(validCheck)
+        if validCheck:
+            post_trade(prediction, valueId)
 
 
-all_pairs = [
-    'BTCUSDT',
-    'ETHBTC',
-    'LINKBTC',
-    'TRXBTC',
-    'XRPBTC',
-    'BATBTC'
-]
-for pair in all_pairs:  
-    bundle(pair)
+
+def job():
+
+    print(datetime.datetime.now())
+
+    all_pairs = [
+        'BTCUSDT',
+        'ETHBTC',
+        'LINKBTC',
+        'TRXBTC',
+        'XRPBTC',
+        'BATBTC'
+    ]
+    for pair in all_pairs:  
+        bundle(pair)
+
+job()
+
+schedule.every().hour.do(job)
+
+while True:
+    schedule.run_pending()
+    time.sleep(30) # wait one minute

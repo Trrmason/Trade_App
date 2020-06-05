@@ -76,8 +76,7 @@ def put_data(pair, limit):
 
 #All Pairs
 def job():
-
-    print('Working... {}'.format(datetime.datetime.now))
+    print(datetime.datetime.now())
 
     all_pairs = [
         'BTCUSDT',
@@ -89,15 +88,14 @@ def job():
     ]
 
     for pair in all_pairs:
-        data = pull_data(pair, 5)
+        data = pull_data(pair, 10)
         post_data(pair, data)
-        put_data(pair,5)
+        put_data(pair,10)
     
-
 job()
 
-# schedule.every().hour.do(job)
+schedule.every(5).minutes.do(job)
 
-# while True:
-#     schedule.run_pending()
-#     time.sleep(30) # wait one minute
+while True:
+    schedule.run_pending()
+    time.sleep(30) # wait one minute

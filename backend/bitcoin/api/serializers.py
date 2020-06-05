@@ -17,4 +17,8 @@ class CoinDataSerializer(serializers.ModelSerializer):
 class ExecutedTradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExecutedTrade
-        fields = "__all__"
+        fields = ('id', 'decision','coinData')
+
+    def to_representation(self,instance):
+        self.fields['coinData'] = CoinDataSerializer(read_only=True)
+        return super(ExecutedTradeSerializer, self).to_representation(instance)
