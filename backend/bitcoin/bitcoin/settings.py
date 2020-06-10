@@ -25,7 +25,7 @@ SECRET_KEY = 'h3$+8_a^3x5tsoarhyklcr&vv+jh)zo#i^nav5y-^jx=rdxro0'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['bitcoin-api-staging.herokuapp.com', 'bitcoin-api-prod.herokuapp.com']
 
 
 # Application definition
