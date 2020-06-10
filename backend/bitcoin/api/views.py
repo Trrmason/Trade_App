@@ -3,6 +3,7 @@ from .serializers import *
 from .models import *
 from django_filters.rest_framework import DjangoFilterBackend
 
+
 class CoinPairViewSet(viewsets.ModelViewSet):
     queryset = CoinPair.objects.all()
     serializer_class = CoinPairSerializer
@@ -18,3 +19,5 @@ class ExecutedTradeViewSet(viewsets.ModelViewSet):
     serializer_class = ExecutedTradeSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ("coinData__pair",)
+
+

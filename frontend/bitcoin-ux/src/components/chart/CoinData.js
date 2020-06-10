@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from 'react'
 import {API_URL, COIN_DATA} from '../../constance/index'
 import Axios from 'axios'
-import Chart from "react-apexcharts";
+import Chart from "react-apexcharts"
+import useWindowDimensions from '../window/Window'
 
 
 function timeStampToDate(time){
@@ -13,11 +14,19 @@ function timeStampToDate(time){
     return ye+'-'+mo+'-'+da+' - '+hr
 }
 
+const chartResponsive = (width, height) => {
+    let widthOut = width/1.5
+    let heightOut = height/1.25
+    widthOut = (width < 1000) ? '100%' : width/1.6
+    return {widthOut, heightOut}
+}
 function CoinData(props){
     const [coinData, setCoinData] = useState([])
+    const { height, width } = useWindowDimensions();
     //Set round amount for display
     useEffect(() => {
-        Axios.get(API_URL+COIN_DATA+'?pair='+props.pair+'&limit=120')
+        const limitAmount =  (width > 1000) ? '120' : '30'
+        Axios.get(API_URL+COIN_DATA+'?pair='+props.pair+'&limit='+limitAmount)
         .then(res => {
             const prices = res.data.results
             setCoinData(prices.reverse())
@@ -25,7 +34,7 @@ function CoinData(props){
         .catch(error => {
             console.log(error)
         })
-    }, [props])
+    }, [props, width])
 
     const dohlc = coinData.map(price => ({
         x: timeStampToDate(price.openTime).toString(),
@@ -70,20 +79,19 @@ function CoinData(props){
                     },
                     autoSelected: 'zoom' 
                   },
-                animations: {
+                  animations: {
                     enabled: true,
-                    easing: 'linear',
-                    speed: 200,
+                    easing: 'easeinout',
+                    speed: 800,
                     animateGradually: {
                         enabled: true,
-                        delay: 100
+                        delay: 150
                     },
                     dynamicAnimation: {
                         enabled: true,
-                        speed: 200
-                    },
+                        speed: 350
+                    }
                 },
-             
             },
             grid: {
                 show: true,
@@ -104,11 +112,11 @@ function CoinData(props){
             plotOptions: {
                 candlestick: {
                   colors: {
-                    upward: '#CDEFD4',
-                    downward: '#FFBCBC'
+                    upward: '#BEF7C9',
+                    downward: '#FF9B9B'
                   },
                   wick: {
-                    useFillColor: true
+                    useFillColor: false
                   }
                 }
             },
@@ -162,14 +170,15 @@ function CoinData(props){
     }
     //Chart Config
     //
-    
+    const dimensions = chartResponsive(width, height)
     return(
         <div>
             <Chart
-              options={chartConfig.options}
-              series={chartConfig.series}
-              type="candlestick"
-              width='65%'
+            options={chartConfig.options}
+            series={chartConfig.series}
+            type="candlestick"
+            width= {dimensions.widthOut}
+            height = {dimensions.heightOut}
             />
         </div>
     )

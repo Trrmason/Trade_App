@@ -88,9 +88,15 @@ def job():
     ]
 
     for pair in all_pairs:
-        data = pull_data(pair, 10)
-        post_data(pair, data)
-        put_data(pair,10)
+        try:
+            data = pull_data(pair, 3)
+            time.sleep(5)
+            post_data(pair, data)
+            put_data(pair,3)
+        except Exception as e:
+            print(e)
+            time.sleep(60)
+            job()
     
 job()
 

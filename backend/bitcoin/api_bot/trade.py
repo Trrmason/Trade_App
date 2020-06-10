@@ -118,8 +118,13 @@ def job():
         'XRPBTC',
         'BATBTC'
     ]
-    for pair in all_pairs:  
-        bundle(pair)
+    for pair in all_pairs:
+        try:  
+            bundle(pair)
+        except Exception as e:
+            print(e)
+            time.sleep(60)
+            job()
 
 job()
 
