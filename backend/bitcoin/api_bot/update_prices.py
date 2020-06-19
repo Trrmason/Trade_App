@@ -3,30 +3,26 @@ import json
 import datetime
 import time
 import numpy as np
-import schedule
 
-#Pull Data from binance
-def pull_data(pair, limit):
+# #Pull Data from binance
+def pull_data(pair):
     base = "https://api.binance.com/api/v3/klines"
     params = {
         'symbol':pair,
         'interval': '1h',
-        'limit' : limit
+        'limit' : '150'
     }
     response = requests.get(base, params).json()
+    print(response)
     return np.array(response)[:,0:7]
-
-def last_ids(pair, limit):
-    base = "http://127.0.0.1:8000/coin_data/?pair={}&limit={}".format(pair,limit)
-    response = requests.get(base).json()
-    return response
 
 #Post Data to API
 def post_data(pair, data):
-    base = "http://127.0.0.1:8000/coin_data/"
+    base = "https://bitcoin-api-prod.herokuapp.com/coin_data/"
     for each in data:
         params = {
             'pair': pair,
+            'tradePair': pair,
             'openTime': each[0],
             'openPrice' : each[1],
             'highPrice': each[2],
@@ -35,73 +31,79 @@ def post_data(pair, data):
             'volume' : each[5],
             'closeTime' : each[6]
         }
-        response = requests.post(base, data = params)
-        print(response)
-
-def put_data(pair, limit):
-    id_response = last_ids(pair,limit)['results']
-    ids = [each['id'] for each in id_response]
-    closeTimes = [each['closeTime'] for each in id_response]
-    data = pull_data(pair, limit)
-    combined = {}
-
-    #Search for ID's
-    for i in range(limit):
-        cur_closeTime = closeTimes[i]
-        cur_id = ids[i]
-        for j in range(limit):
-            data_closeTime = data[j][-1]
-            if cur_closeTime == int(data_closeTime):
-                combined[cur_id] = np.array(data[j])
-                break
-
-    #Take the dict and call the api endpoint , put
-    for key, value in combined.items():
-        base = "http://127.0.0.1:8000/coin_data/{}/".format(key)
-        params = {
-            'pair': pair,
-            'openTime': value[0],
-            'openPrice' : value[1],
-            'highPrice': value[2],
-            'lowPrice' : value[3],
-            'closePrice': value[4],
-            'volume' : value[5],
-            'closeTime' : value[6]
-        }
-        response = requests.put(base, data = params)
-        print(response)
-
-
+        requests.post(base, data = params)
+        print(each)
 
 
 #All Pairs
-def job():
-    print(datetime.datetime.now())
+all_pairs = [
+    'BTCUSDT',
+    'ETHUSDT',
+    'LTCUSDT',
+    'TRXUSDT',
+    'BATUSDT',
+    'EOSUSDT',
+    'ETCUSDT',
+    'LINKUSDT',
+    'ADAUSDT',
+    'ZECUSDT',
+    'DASHUSDT',
+    'BNBUSDT',
+    'VETUSDT'
+]
 
-    all_pairs = [
-        'BTCUSDT',
-        'ETHBTC',
-        'LINKBTC',
-        'TRXBTC',
-        'XRPBTC',
-        'BATBTC'
-    ]
+# for pair in all_pairs:
+#     data = pull_data(pair)
+#     post_data(pair, data)
 
-    for pair in all_pairs:
-        try:
-            data = pull_data(pair, 3)
-            time.sleep(5)
-            post_data(pair, data)
-            put_data(pair,3)
-        except Exception as e:
-            print(e)
-            time.sleep(60)
-            job()
+#print(pull_data('BTCUSDT'))
+
+def start_date():
+    #This are the furthest Binance will allow
+    startYear = 2017
+    startMonth = 8
+    startDay = 17
+    startDateTime = datetime.datetime(startYear, startMonth, startDay)
+    return startDateTime
+
+
+# def pull_data(pair):
+#     #api constants
+#     base = "https://api.binance.com"
+#     oldTrades = "/api/v3/klines"
     
+#     #startDate
+#     startDateTime = start_date()
+    
+#     #list of responses
+#     lor = []
+    
+#     for i in range(100):
+#         if i != 0:
+#             startDateTime += datetime.timedelta(hours=1000)
+            
+#         #convert starttime to int milli
+#         startTime = int((startDateTime.timestamp())*1000.0)
+#         #params
+#         params = {'symbol':pair,
+#                   'interval':'1h',
+#                   'startTime':startTime,
+#                   'limit':'1000'}
+#         response = requests.get(base+oldTrades, params).json()
+#         lor.append(response)
+#     return lor
+
+
+# lor = pull_data('BTCUSDT')
+# forDf = []
+# for kline_set in lor:
+#     for each in kline_set:
+#         forDf.append(np.array(each))
+# updateForDf = np.array(forDf)[:,0:7]
+
+def job():
+    for pair in all_pairs:
+        lor = pull_data(pair)
+        #updatedForDf = np.array(forDf)[:,0:7]
+        post_data(pair, lor)
 job()
-
-schedule.every(5).minutes.do(job)
-
-while True:
-    schedule.run_pending()
-    time.sleep(30) # wait one minute

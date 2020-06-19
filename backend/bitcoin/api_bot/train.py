@@ -67,7 +67,7 @@ def pull_data(pair):
     return response['results'][::-1]
 
 
-lor = pull_data('LINKBTC')
+lor = pull_data('LTCUSDT')
 #print(lor)
 binance_df = pd.DataFrame(data=lor)
 binance_df = binance_df.drop(columns=['pair', 'id'], axis=1)
@@ -120,4 +120,4 @@ print("{} last 10 up_down".format(y_data[-10:]))
 gbc = GradientBoostingClassifier(n_estimators = 100, max_depth = 1, random_state = 0)
 gbc.fit(x_data,y_data)
 print(gbc.score(x_data,y_data))
-joblib.dump(gbc,'./trained_models/linkbtc_model.pkl', compress=9)
+joblib.dump(gbc,'./trained_models/ethusdt_model.pkl', compress=9)
